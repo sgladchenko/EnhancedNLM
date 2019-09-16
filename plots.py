@@ -333,9 +333,9 @@ if __name__ == "__main__":
 	#Fourier_curves_Pauli_components("./sk/rec.bin", "./sk/gridx.bin", "./sk/gridE.bin", "./sk/Fourier_curves_Pauli_components.png", max_k=350, loglog=False)
 	#Last_z_curves_Pauli_components("./sk/rec.bin", "./sk/gridx.bin", "./sk/gridE.bin", "./sk/Last_z_curves_Pauli_components.png")
 
-	Fourier_curves_Pauli_components("rec.bin", "gridx.bin", "gridE.bin", "Fourier_curves_Pauli_components.png", max_k=350, loglog=False)
-	Last_z_curves_Pauli_components("rec.bin", "gridx.bin", "gridE.bin", "Last_z_curves_Pauli_components.png")
+	Fourier_curves_Pauli_components("./data/rec.bin", "./data/gridx.bin", "./data/gridE.bin", "./plots/Fourier_curves_Pauli_components.png", max_k=350, loglog=False)
+	Last_z_curves_Pauli_components("./data/rec.bin", "./data/gridx.bin", "./data/gridE.bin", "./plots/Last_z_curves_Pauli_components.png")
 
-	Fix_E("Fix_E.bin", "gridz.bin", "gridx.bin", "Fix_E.png")
-	Average_by_x("Average_by_x.bin", "gridz.bin", "gridE.bin", "Average_by_x.png")
-	Average_by_x_curves("Average_by_x.bin", "gridz.bin", "gridE.bin", "Average_by_x_curves.png")
+	Fix_E("./data/Fix_E.bin", "./data/gridz.bin", "./data/gridx.bin", "./plots/Fix_E.png")
+	Average_by_x("./data/Average_by_x.bin", "./data/gridz.bin", "./data/gridE.bin", "./plots/Average_by_x.png")
+	Average_by_x_curves("./data/Average_by_x.bin", "./data/gridz.bin", "./data/gridE.bin", "./plots/Average_by_x_curves.png")

@@ -62,7 +62,7 @@ const double s2theta  = sin(2*theta);
 
 const double Emin = 1.0  * ph::MeV;      // reducing troubles which may occur with divisions by zero etc.
 const double Emax = 50.0 * ph::MeV;      // the limit of 'infinite' integral
-const int    N_E  = 30;                   // count of segments in energy spectra
+const int    N_E  = 10;                   // count of segments in energy spectra
 const double dE   = (Emax - Emin) / N_E; // the step of energy mesh
 
 /* X-MESH */
@@ -70,7 +70,7 @@ const double dE   = (Emax - Emin) / N_E; // the step of energy mesh
 const double Xmin = 0.0  * ph::km;
 const double Xmax = 50.0 * ph::km;
 const double L    = Xmax - Xmin; 
-const int    N_X  = 1000;
+const int    N_X  = 200;
 const double dX   = Xmax / N_X;
 
 /* Z-MESH OF THIS PART OF CALCULATIONS */
@@ -81,7 +81,7 @@ const double dX   = Xmax / N_X;
 const double Z_displacement = 50 * ph::km;
 
 const int N_Z     = 250;  // the points which will be saved in files
-const int STEP_Z  = 1000; // the period of the mesh -- that means every STEP_Z'th point of real mesh will be placed in the mesh in output
+const int STEP_Z  = 10; // the period of the mesh -- that means every STEP_Z'th point of real mesh will be placed in the mesh in output
 const int COUNT_Z = N_Z * STEP_Z;  // the full number of points in real mesh, without the initial points
 const double dZ   = Z_displacement / COUNT_Z;
 

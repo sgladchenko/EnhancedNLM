@@ -6,8 +6,8 @@ all:
 
 # Main calculational unit in this project
 
-run: main.o matrix.o InitialSpectra.o node.o inhomogeneities.o segmentation.o io.o 
-	$(compiler) main.o node.o InitialSpectra.o matrix.o inhomogeneities.o segmentation.o io.o -o run
+run: main.o matrix.o InitialSpectra.o node.o inhomogeneities.o segmentation.o io.o evolution.o
+	$(compiler) main.o node.o InitialSpectra.o matrix.o inhomogeneities.o segmentation.o io.o evolution.o -o run
 
 main.o: ./source/main.cpp node.o
 	$(compiler) -c ./source/main.cpp -lm
@@ -29,6 +29,9 @@ io.o: ./source/io.cpp segmentation.o
 
 segmentation.o: ./source/segmentation.cpp
 	$(compiler) -c ./source/segmentation.cpp -lm
+
+evolution.o: ./source/evolution.cpp
+	$(compiler) -c ./source/evolution.cpp -lm
 
 # Executable which generates for us initial data, saved in rec.bin
 

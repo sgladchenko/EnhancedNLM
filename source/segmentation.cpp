@@ -38,7 +38,7 @@ void get_scatter_counts(int size, int* counts)
 {
 	// array contains the counts for each node in communicator
 	// while scattering
-	// (in sizes of MPISpectra)
+	// (in sizes of MPIComplex)
 	
 	int temp_leftX, temp_rightX;
 
@@ -66,7 +66,7 @@ void get_scatter_displacements(int size, int* displacements)
 	}
 }
 
-// This functions are used for gathering small amounts of data
+// These functions are used for gathering small amounts of data
 // (it appeared in update when we added gathering while calculations are being processed)
 
 void get_line_counts(int size, int* counts)

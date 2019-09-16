@@ -6,20 +6,20 @@
 
 // Filenames of binary output
 
-#define P_OUTBIN "p.bin"
-#define M_OUTBIN "m.bin"
-#define ANTIP_OUTBIN "antip.bin"
-#define ANTIM_OUTBIN "antim.bin"
+#define P_OUTBIN "./data/p.bin"
+#define M_OUTBIN "./data/m.bin"
+#define ANTIP_OUTBIN "./data/antip.bin"
+#define ANTIM_OUTBIN "./data/antim.bin"
 
-#define REC_FNAME "rec.bin"
+#define REC_FNAME "./data/rec.bin"
 
-#define ZGRID "gridz.bin"
-#define XGRID "gridx.bin"
-#define EGRID "gridE.bin"
+#define ZGRID "./data/gridz.bin"
+#define XGRID "./data/gridx.bin"
+#define EGRID "./data/gridE.bin"
 
-#define Z_FNAME "z.txt"
+#define Z_FNAME "./data/z.txt"
 
-#define HARMONICS_FILE "harmonics.bin"
+#define HARMONICS_FILE "./data/harmonics.bin"
 
 void Text_input_Z_init(double& Z_init);
 void Text_output_Z_final(double Z_final);
