@@ -47,7 +47,7 @@ const double antixx0 = 1 - antiee0;
 
 const double eta   = 1.0;                    // the hierarchy of masses (either +1 or -1)
 const double omega = 30.0 * ph::deg;         // the angle of both beams
-const double theta = 9.0  * ph::deg;        // the lovely mixing angle
+const double theta = 9.0  * ph::deg;         // the lovely mixing angle
 const double dm2   = 2.5e-3 * ph::eV*ph::eV; // the diff. between squared masses
 const double n0    = 5.0e28 / cubed(ph::cm); // the constant level of the concentration, the 'luminosity'
 
@@ -70,7 +70,7 @@ const double dE   = (Emax - Emin) / N_E; // the step of energy mesh
 const double Xmin = 0.0  * ph::km;
 const double Xmax = 50.0 * ph::km;
 const double L    = Xmax - Xmin; 
-const int    N_X  = 200;
+const int    N_X  = 700;
 const double dX   = Xmax / N_X;
 
 /* Z-MESH OF THIS PART OF CALCULATIONS */

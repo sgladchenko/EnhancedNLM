@@ -2,16 +2,13 @@
 #include "segmentation.h"
 #include "io.h"
 #include "matrix.h"
+#include "pmatrix.h"
 #include "InitialSpectra.h"
 #include "inhomogeneities.h"
 #include "evolution.h"
 
 #include <iostream>
 #include <iomanip>
-
-// Pauli matrices which will be used in Hamiltonians
-Matrix tau1(0, 1, 1, 0);
-Matrix tau3(1, 0, 0, -1);
 
 // imaginary unit and Pi
 using ph::I;

@@ -17,7 +17,7 @@ public:
 	Matrix operator*(const Matrix& m) const;
 	Matrix operator*(const Complex& Z) const;
 
-	// hermit conjugate
+	// Hermitian conjugate
 	Matrix hermit() const;
 
 	// trace function
@@ -31,7 +31,7 @@ public:
 	void operator=(const Matrix& m);
 
 	friend Matrix operator*(const Complex& Z, const Matrix& m); // left multiplicating
-	// friend is used to allow function see private elements of the class in 'm'
+	// friend is used to allow function to see the private elements of the class in 'm'
 	// because it's not a member of class
 
 	void set(int i, int j, const Complex& Z);
@@ -50,5 +50,7 @@ private:
 
 Matrix comm(const Matrix& m1, const Matrix& m2);
 Matrix anticomm(const Matrix& m1, const Matrix& m2);
+
+extern Matrix tau0, tau1, tau2, tau3;
 
 #endif

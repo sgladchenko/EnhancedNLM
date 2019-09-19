@@ -1,4 +1,5 @@
 #include "matrix.h"
+#include "pmatrix.h"
 #include "InitialSpectra.h"
 #include "constants.h"
 #include "inhomogeneities.h"

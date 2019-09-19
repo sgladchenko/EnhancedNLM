@@ -1,5 +1,11 @@
 #include "matrix.h"
 
+// Pauli matrices
+Matrix tau0(1, 0, 0, 1);
+Matrix tau1(0, 1, 1, 0);
+Matrix tau2(0, -Complex(0, 1.0), Complex(0, 1.0), 0);
+Matrix tau3(1, 0, 0, -1);
+
 Matrix::Matrix(Complex e11, Complex e12, Complex e21, Complex e22)
 {
 	this->e11 = e11; this->e12 = e12; this->e21 = e21; this->e22 = e22;

@@ -26,9 +26,11 @@ def Fix_E(filename, filename_zgrid, filename_xgrid, filename_plot, i=0, j=0):
 	N_Z = len(zgrid)
 	N_X = len(xgrid)
 
+	#mesh = np.array([[np.real(data[z*N_X*4 + x*4 + i*2 + j]) for x in range(N_X)] + [np.real(data[z*N_X*4 + x*4 + i*2 + j]) for x in range(N_X)] for z in range(N_Z)])
 	mesh = np.array([[np.real(data[z*N_X*4 + x*4 + i*2 + j]) for x in range(N_X)] for z in range(N_Z)])
 
 	Zs = np.array(zgrid)
+	#Xs = np.array(list(xgrid) + [x + xgrid[-1] for x in xgrid])
 	Xs = np.array(xgrid)
 
 	fig = Figure(figsize=(8, 6))

@@ -6,8 +6,8 @@ all:
 
 # Main calculational unit in this project
 
-run: main.o matrix.o InitialSpectra.o node.o inhomogeneities.o segmentation.o io.o evolution.o
-	$(compiler) main.o node.o InitialSpectra.o matrix.o inhomogeneities.o segmentation.o io.o evolution.o -o run
+run: main.o matrix.o InitialSpectra.o node.o inhomogeneities.o segmentation.o io.o evolution.o pmatrix.o
+	$(compiler) main.o node.o InitialSpectra.o matrix.o inhomogeneities.o segmentation.o io.o evolution.o pmatrix.o -o run
 
 main.o: ./source/main.cpp node.o
 	$(compiler) -c ./source/main.cpp -lm
@@ -17,6 +17,9 @@ node.o: io.o matrix.o inhomogeneities.o segmentation.o ./source/node.cpp
 
 matrix.o: ./source/matrix.cpp
 	$(compiler) -c ./source/matrix.cpp -lm
+
+pmatrix.o: ./source/pmatrix.cpp
+	$(compiler) -c ./source/pmatrix.cpp -lm
 
 InitialSpectra.o: ./source/InitialSpectra.cpp
 	$(compiler) -c ./source/InitialSpectra.cpp -lm
