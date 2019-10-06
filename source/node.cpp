@@ -6,6 +6,7 @@
 #include "InitialSpectra.h"
 #include "inhomogeneities.h"
 #include "evolution.h"
+#include "pmatrix.h"
 
 #include <iostream>
 #include <iomanip>
@@ -94,6 +95,16 @@ void node(int rank, int size)
 	get_scatter_counts(size, counts);
 	get_scatter_displacements(size, displacements);
 
+	// counts/displacements for gathering the adiabaticities
+
+	int* ad_counts        = new int[size];
+	int* ad_displacements = new int[size];
+
+	get_ad_counts(size, ad_counts);
+	get_ad_displacements(size, ad_displacements);
+
+	// Scattering of the initial data
+
 	MPI_Scatterv(scatt_buffer, counts, displacements, MPIComplex, scatt_buffer, (mycountX + 2) * 16*N_E, MPIComplex, 0, MPIWorld);
 	MPI_Bcast(&Z_init, 1, MPI_DOUBLE, 0, MPIWorld);
 
@@ -151,6 +162,32 @@ void node(int rank, int size)
 			antim_odd[x*N_E + e].unpack(scatt_buffer + x*4*4*N_E + e*4*4 + 3*4);
 		}
 	}
+
+	// NEW: Grids of the Hamiltonians -- we're to estimate the adiabaticity of only one flow
+
+	PMatrix* PH_p_even = new PMatrix[(mycountX + 1)*N_E]; // we actually need just the left neighbour's element
+	PMatrix* PH_p_odd  = new PMatrix[(mycountX + 1)*N_E]; // due to we're employing the 1st order exressions
+
+	PMatrix* PH_p_old;
+	PMatrix* PH_p;
+
+	// Buffers of gathering the adiabaticity factor
+
+	Complex* adiabaticity_buffer;
+
+	if (rank == 0)
+	{
+		adiabaticity_buffer = new Complex[N_X * N_E];		
+	}
+	else
+	{
+		adiabaticity_buffer = new Complex[mycountX * N_E];
+	}
+
+	// Extra buffers for interchanges of the Hamiltonians: in order to evaluate the adiabaticity factor
+
+	Complex* send_PH_p_buf = new Complex[N_E * 4];
+	Complex* recv_PH_p_buf = new Complex[N_E * 4];
 
 	// Spectra buffers; used in integrals
 
@@ -251,7 +288,7 @@ void node(int rank, int size)
 
 	for (int z = 0; z < N_Z; ++z)
 	{
-		for (int zi = 0; zi < STEP_Z; ++zi)
+		for (int zi = 0; zi < STEP_Z; ++zi) // The calculational phase
 		{
 			// Current index of iteration and Z-coordinate
 
@@ -264,19 +301,33 @@ void node(int rank, int size)
 
 			if (ITER % 2 == 0)
 			{
-				p = p_even; antip = antip_even;
-				m = m_even; antim = antim_even;
+				p         = p_even;
+				m         = m_even;
+				antip     = antip_even;
+				antim     = antim_even;
 
-				old_p = p_odd; old_antip = antip_odd;
-				old_m = m_odd; old_antim = antim_odd;
+				old_p     = p_odd; 
+				old_m     = m_odd;
+				old_antip = antip_odd;
+				old_antim = antim_odd;
+
+				PH_p      = PH_p_even;
+				PH_p_old  = PH_p_odd;
 			}
 			else
 			{
-				p = p_odd; antip = antip_odd;
-				m = m_odd; antim = antim_odd;
+				p         = p_odd; 
+				m         = m_odd;
+				antip     = antip_odd;
+				antim     = antim_odd;
 
-				old_p = p_even; old_antip = antip_even;
-				old_m = m_even; old_antim = antim_even;
+				old_p     = p_even; 
+				old_m     = m_even; 
+				old_antip = antip_even;
+				old_antim = antim_even;
+
+				PH_p      = PH_p_odd;
+				PH_p_old  = PH_p_even;
 			}
 
 			// 1ST COEFFICIENT OF RK //
@@ -292,6 +343,7 @@ void node(int rank, int size)
 				        mycountX,
 				        Z,
 				        Xleft,
+				        PH_p,
 				        K1);
 
 			interchange_Ks(K1,
@@ -303,6 +355,36 @@ void node(int rank, int size)
 					       right_neighbour,
 					       1,
 					       mycountX);
+
+			if (AD && ((zi == STEP_Z - 1) || (zi == STEP_Z - 2))) // Either it's the last iteration of this phase or before the last one
+			{
+				interchange_PH_p(PH_p,
+				                 send_PH_p_buf,
+				   			     recv_PH_p_buf,
+					  			 left_neighbour,
+					  			 right_neighbour,
+					  			 mycountX);
+
+				if (zi == STEP_Z - 1) // At the end of this calculational phase -- calculating
+				{
+					evaluate_adiabaticity(PH_p_old, PH_p, adiabaticity_buffer, mycountX);
+				}
+				else if (zi == STEP_Z - 2) // Before the last one -- something has to be prepared
+				{
+					// Explicit normalisation; it won't be conducted at this iteration
+					// because evaluate_adiabaticity won't work there.
+					// But at the next iteration we need exactly normalised values
+					// in the PH_p_old array
+
+					for (int x = 0; x <= mycountX; ++x)
+					{
+						for (int s = 0; s < N_E; ++s)
+						{
+							PH_p[x*N_E + s].normalise();
+						}
+					}
+				}
+			}
 
 			// 2ND COEFFICIENT OF RK //
 
@@ -422,7 +504,7 @@ void node(int rank, int size)
 			}
 		}
 
-		// Gathering and saving
+		// Gathering and saving the main calculational data
 
 		if (rank == 0)
 		{
@@ -437,6 +519,23 @@ void node(int rank, int size)
 		else
 		{
 			MPI_Gatherv(gath_buffer, mycountX * N_E * 16, MPIComplex, NULL, counts, displacements, MPIComplex, 0, MPIWorld);			
+		}
+
+		// Gathering the adiabaticity grid, if needed
+
+		if (AD)
+		{
+			if (rank == 0)
+			{
+				MPI_Gatherv(MPI_IN_PLACE, mycountX*N_E, MPIComplex, adiabaticity_buffer, ad_counts, ad_displacements, MPIComplex, 0, MPIWorld);
+
+				// Saving at the binary file
+				Bin_output_ad(size, ad_counts, ad_displacements, adiabaticity_buffer);
+			}
+			else
+			{
+				MPI_Gatherv(adiabaticity_buffer, mycountX*N_E, MPIComplex, NULL, ad_counts, ad_displacements, MPIComplex, 0, MPIWorld);
+			}
 		}
 
 		// LOG THIS IN STDOUT //

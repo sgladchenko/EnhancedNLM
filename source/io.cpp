@@ -158,7 +158,7 @@ void Bin_input_harmonics(int num_harmonics, double* harmonics)
 
 void make_bin_files()
 {
-	std::ofstream p, m, antip, antim;
+	std::ofstream p, m, antip, antim, ad;
 
 	p.open(P_OUTBIN, std::ios::binary);
 	m.open(M_OUTBIN, std::ios::binary);
@@ -166,10 +166,14 @@ void make_bin_files()
 	antip.open(ANTIP_OUTBIN, std::ios::binary);
 	antim.open(ANTIM_OUTBIN, std::ios::binary);
 
+	ad.open(AD_OUT, std::ios::binary);
+
 	p.close();
 	m.close();
 	antip.close();
-	antim.close();	
+	antim.close();
+
+	ad.close();
 }
 
 void Bin_output_line(int size, int* counts, int* displacements, Complex* gath_buffer)
@@ -265,4 +269,29 @@ void add_to_gridz(double Z_here)
 	bin_write(zgrid, &Z, 1);
 
 	zgrid.close();
+}
+
+// Binary output of the grid of the adiabaticity factor
+
+void Bin_output_ad(int size, int* ad_counts, int* ad_displacements, Complex* adiabaticity_buffer)
+{
+	std::ofstream ad_output;
+
+	ad_output.open(AD_OUT, std::ios::app | std::ios::binary);
+
+	for (int r = 0; r < size; ++r)
+	{
+		int countX = ad_counts[r] / N_E;
+		int dsp    = ad_displacements[r];
+
+		for (int x = 0; x < countX; ++x)
+		{
+			for (int e = 0; e < N_E; ++e)
+			{
+				bin_write(ad_output, adiabaticity_buffer + dsp + x*N_E + e, 1);
+			}
+		}
+	}
+
+	ad_output.close();
 }

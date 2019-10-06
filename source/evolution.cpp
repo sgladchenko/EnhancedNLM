@@ -5,6 +5,7 @@
 #include "inhomogeneities.h"
 #include "node.h"
 #include <iostream>
+#include <cmath>
 
 // These functions are to implement the evaluation of the K1..K4
 // coefficients of the RK-cycle
@@ -81,6 +82,79 @@ void interchange_Ks(Matrix*  Kbuf,
 	}
 }
 
+void interchange_PH_p(PMatrix* PH_p,
+					  Complex* send_PH_p_buf,
+					  Complex* recv_PH_p_buf,
+					  int left_neighbour,
+					  int right_neighbour,
+					  int mycountX)
+{
+	// Packing all the interesting elements in the corresponding buffers
+
+	for (int s = 0; s < N_E; ++s)
+	{
+		// Pack the rightest element
+
+		int x = mycountX;
+		PH_p[x*N_E + s].pack(send_PH_p_buf + s*4);
+	}
+
+	// Interchange of the values; send to the right neighbour and receive from the left one
+
+	MPI_Request req; MPI_Status  stat;
+
+	MPI_Isend(send_PH_p_buf, 4*N_E, MPIComplex, right_neighbour, 5, MPIWorld, &req);
+	MPI_Recv(recv_PH_p_buf, 4*N_E, MPIComplex, left_neighbour, 5, MPIWorld, &stat);
+
+	// Unpacking back the values from the receive buffer
+
+	for (int s = 0; s < N_E; ++s)
+	{
+		// Unpack to the left element of the array
+
+		int x = 0;
+		PH_p[x*N_E + s].unpack(recv_PH_p_buf + s*4);
+	}
+}
+
+
+void evaluate_adiabaticity(PMatrix* PH_p_old,
+						   PMatrix* PH_p,
+						   Complex* adiabaticity,
+						   int mycountX)
+{
+	for (int x = 1; x <= mycountX; ++x)
+	{
+		for (int s = 0; s < N_E; ++s)
+		{
+			// The eigenvalues of the Hamiltonian here at this point (x, e)
+			Complex eps_1, eps_2;
+
+			// Normalise the Hamiltonian
+			PH_p[x*N_E + s].normalise();
+
+			// Obtain them from the PMatrix object
+			PH_p[x*N_E + s].eigs(eps_1, eps_2);
+
+			// Evaluate the derivative \nabla h
+			PMatrix derivative;
+
+			derivative = comega * (PH_p[x*N_E + s] - PH_p_old[x*N_E + s]) / dZ + 
+						 somega * (PH_p[x*N_E + s] - PH_p[(x-1)*N_E + s]) / dX;
+
+			// Make the skew product of PH_p and derivate
+			PMatrix skew;
+
+			skew = PH_p[x*N_E + s].skew(derivative);
+
+			// Evaluate the factor and save it on the grid
+
+			adiabaticity[(x-1)*N_E + s] = std::abs(eps_1 - eps_2) / skew.norm();
+			//adiabaticity[(x-1)*N_E + s] = 5;
+		}
+	}
+}
+
 // RK-coefficients
 
 void evaluate_K1(Matrix* old_p,
@@ -94,6 +168,7 @@ void evaluate_K1(Matrix* old_p,
 				 int mycountX,
 				 double Z,
 				 double Xleft,
+				 PMatrix* PH_p,
 				 Matrix* K1) // the output buffer
 {
 	for (int x = 1; x <= mycountX; ++x)
@@ -135,7 +210,16 @@ void evaluate_K1(Matrix* old_p,
 			Matrix H_antip(-1.0*H_0_mesh[s] + H_nn_p);
 			Matrix H_antim(-1.0*H_0_mesh[s] + H_nn_m);
 
+			// Save the PMatrix-formed Hamiltonians in order to interchange them in the following
+			// (only if we need to evaluate the adiabaticity factor)
+
+			if (AD)
+			{
+				PH_p[x*N_E + s].from_matrix(H_p);
+			}
+
 			// Evaluate K1
+
 			K1[4*x*N_E + 4*s + 0] = -1.0*tanomega*Dp     - I/(ph::hbar*ph::c*comega)*comm(H_p,     old_p[x*N_E + s]);     // p
 			K1[4*x*N_E + 4*s + 1] =      tanomega*Dm     - I/(ph::hbar*ph::c*comega)*comm(H_m,     old_m[x*N_E + s]);     // m
 			K1[4*x*N_E + 4*s + 2] = -1.0*tanomega*Dantip - I/(ph::hbar*ph::c*comega)*comm(H_antip, old_antip[x*N_E + s]); // antip

@@ -10,4 +10,7 @@ void get_scatter_displacements(int size, int* displacements);
 void get_line_counts(int size, int* counts);
 void get_line_displacements(int size, int* displacements);
 
+void get_ad_counts(int size, int* ad_counts);
+void get_ad_displacements(int size, int* ad_displacements);
+
 #endif

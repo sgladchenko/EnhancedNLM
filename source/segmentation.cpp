@@ -1,7 +1,7 @@
 #include "segmentation.h"
 #include "constants.h"
 
-// function gives the chunck of X cooridinates
+// Function gives the chunck of X cooridinates
 void get_segment_X(int rank, int size, int& left, int& right) // [left, right] in [0; N_X-1]
 {
 	if (rank >= N_X%size)
@@ -23,7 +23,7 @@ void get_segment_X(int rank, int size, int& left, int& right) // [left, right] i
 
 void get_countXs(int size, int* countXs)
 {
-	// array contains the countX's for each node in communicator
+	// Array contains the countX's for each node in communicator
 	
 	int temp_leftX, temp_rightX;
 
@@ -36,7 +36,7 @@ void get_countXs(int size, int* countXs)
 
 void get_scatter_counts(int size, int* counts)
 {
-	// array contains the counts for each node in communicator
+	// Array contains the counts for each node in communicator
 	// while scattering
 	// (in sizes of MPIComplex)
 	
@@ -51,7 +51,7 @@ void get_scatter_counts(int size, int* counts)
 
 void get_scatter_displacements(int size, int* displacements)
 {
-	// array contains the displacements for each node in communicator
+	// Array contains the displacements for each node in communicator
 	// while scattering
 	// (in sizes of MPIComplex)
 	
@@ -71,7 +71,7 @@ void get_scatter_displacements(int size, int* displacements)
 
 void get_line_counts(int size, int* counts)
 {
-	// array contains the counts for each node in communicator
+	// Array contains the counts for each node in communicator
 	// while gathering ONE line of constant z
 	// (in sizes of MPIComplex)
 	
@@ -86,7 +86,7 @@ void get_line_counts(int size, int* counts)
 
 void get_line_displacements(int size, int* displacements)
 {
-	// array contains the displacements for each node in communicator
+	// Array contains the displacements for each node in communicator
 	// while gathering ONE line of constant z
 	// (in sizes of MPIComplex)
 	
@@ -97,6 +97,35 @@ void get_line_displacements(int size, int* displacements)
 	{
 		get_segment_X(r, size, temp_leftX, temp_rightX);
 		displacements[r] = temp_sum * 16 * N_E;
+		temp_sum += temp_rightX - temp_leftX + 1;
+	}
+}
+
+void get_ad_counts(int size, int* ad_counts)
+{
+	// Similar functionality, but for the gathering of adiabaticity factors
+
+	int temp_leftX, temp_rightX;
+
+	for (int r = 0; r < size; ++r)
+	{
+		get_segment_X(r, size, temp_leftX, temp_rightX);
+		ad_counts[r] = (temp_rightX - temp_leftX + 1) * N_E;
+	}
+
+}
+
+void get_ad_displacements(int size, int* ad_displacements)
+{
+	// Similar functionality, but for the gathering of adiabaticity factors
+
+	int temp_leftX, temp_rightX, temp_sum;
+	temp_sum = 0;
+
+	for (int r = 0; r < size; ++r)
+	{
+		get_segment_X(r, size, temp_leftX, temp_rightX);
+		ad_displacements[r] = temp_sum * N_E;
 		temp_sum += temp_rightX - temp_leftX + 1;
 	}
 }
