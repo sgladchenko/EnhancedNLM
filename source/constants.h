@@ -71,7 +71,7 @@ const double dE   = (Emax - Emin) / N_E; // the step of energy mesh
 const double Xmin = 0.0  * ph::km;
 const double Xmax = 50.0 * ph::km;
 const double L    = Xmax - Xmin; 
-const int    N_X  = 500;
+const int    N_X  = 700;
 const double dX   = Xmax / N_X;
 
 /* Z-MESH OF THIS PART OF CALCULATIONS */
@@ -81,8 +81,8 @@ const double dX   = Xmax / N_X;
 
 const double Z_displacement = 50 * ph::km;
 
-const int N_Z     = 200;  // the points which will be saved in files
-const int STEP_Z  = 5; // the period of the mesh -- that means every STEP_Z'th point of real mesh will be placed in the mesh in output
+const int N_Z     = 500;  // the points which will be saved in files
+const int STEP_Z  = 10; // the period of the mesh -- that means every STEP_Z'th point of real mesh will be placed in the mesh in output
 const int COUNT_Z = N_Z * STEP_Z;  // the full number of points in real mesh, without the initial points
 const double dZ   = Z_displacement / COUNT_Z;
 

@@ -354,13 +354,49 @@ def Ad(filename, filename_zgrid, filename_xgrid, filename_egrid, filename_plot, 
 	Xs, Zs = np.meshgrid(Xs, Zs)
 
 	axs  = fig.add_subplot(111)
-	plot = axs.pcolor(Xs, Zs, grid, cmap=cm.viridis)
+	plot = axs.pcolor(Xs, Zs, grid, cmap=cm.viridis, vmin=0, vmax=40)
 
 	axs.set_title(r"Adiabaticity", fontsize=12)
 	axs.set_xlabel(r"$x, \mathrm{km}$")
 	axs.set_ylabel(r"$z, \mathrm{km}$")
 
 	fig.colorbar(plot)
+	fig.savefig(filename_plot, fmt="png")
+
+def Ad_one_line(filename, filename_zgrid, filename_xgrid, filename_egrid, filename_plot, e, x):
+	ticker.rcParams['xtick.direction'] = 'in'
+	ticker.rcParams['ytick.direction'] = 'in'
+
+	data  = np.fromfile(filename, dtype=np.complex128)
+	zgrid = np.fromfile(filename_zgrid, dtype=np.float64)
+	xgrid = np.fromfile(filename_xgrid, dtype=np.float64)
+	egrid = np.fromfile(filename_egrid, dtype=np.float64)
+
+	N_Z = len(zgrid)
+	N_X = len(xgrid)
+	N_E = len(egrid)
+
+	grid = np.array([np.real(data[z*N_X*N_E + x*N_E + e]) for z in range(N_Z)])
+
+	fig = Figure(figsize=(8, 6))
+	FigureCanvas(fig)
+
+	axs  = fig.add_subplot(111)
+	fig.subplots_adjust(right=0.80)
+
+	errorbar = axs.errorbar(
+			x=zgrid,
+			y=grid,
+			fmt='-',
+			markersize=6
+		)			
+
+	axs.set_title(r"Adiabaticity $x={}$ of $N_X={}$".format(x, N_X), fontsize=12)
+	axs.set_xlabel(r"$z, \mathrm{km}$")
+	axs.set_xlim([0, np.max(zgrid)])
+	axs.set_ylim([0, 10])
+	axs.grid(True)
+
 	fig.savefig(filename_plot, fmt="png")
 
 if __name__ == "__main__":
@@ -375,3 +411,4 @@ if __name__ == "__main__":
 	Average_by_x_curves("./data/Average_by_x.bin", "./data/gridz.bin", "./data/gridE.bin", "./plots/Average_by_x_curves.png")
 
 	Ad("./data/ad.bin", "./data/gridz.bin", "./data/gridx.bin", "./data/gridE.bin", "./plots/Ad.png", 3)
+	Ad_one_line("./data/ad.bin", "./data/gridz.bin", "./data/gridx.bin", "./data/gridE.bin", "./plots/Ad_one_line.png", e=3, x=300)

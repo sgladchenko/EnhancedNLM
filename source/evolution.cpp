@@ -130,11 +130,11 @@ void evaluate_adiabaticity(PMatrix* PH_p_old,
 			// The eigenvalues of the Hamiltonian here at this point (x, e)
 			Complex eps_1, eps_2;
 
-			// Normalise the Hamiltonian
-			PH_p[x*N_E + s].normalise();
-
 			// Obtain them from the PMatrix object
 			PH_p[x*N_E + s].eigs(eps_1, eps_2);
+
+			// Normalise the Hamiltonian
+			PH_p[x*N_E + s].normalise();
 
 			// Evaluate the derivative \nabla h
 			PMatrix derivative;
@@ -149,7 +149,7 @@ void evaluate_adiabaticity(PMatrix* PH_p_old,
 
 			// Evaluate the factor and save it on the grid
 
-			adiabaticity[(x-1)*N_E + s] = std::abs(eps_1 - eps_2) / skew.norm();
+			adiabaticity[(x-1)*N_E + s] = std::abs(eps_1 - eps_2) / (ph::hbar * ph::c) / skew.norm();
 			//adiabaticity[(x-1)*N_E + s] = 5;
 		}
 	}
