@@ -1,8 +1,8 @@
 #include <fstream>
 #include <string>
 
-#include "io.h"
-#include "constants.h"
+#include "BaseBin.h"
+#include "Constants.h"
 
 // Some templates to simplify writing/reading binaries
 
@@ -26,7 +26,7 @@ void bin_write(std::ofstream& stream, T* buf, int count)
 
 // Get parameters of grids
 
-void get_grid_numbers(int& localN_Z, int& localN_X, int& localN_E)
+void GetGridNumbers(int& localN_Z, int& localN_X, int& localN_E)
 {
 	std::ifstream gridz, gridx, gridE;
 
@@ -58,7 +58,7 @@ void Fix_E(std::string fin, std::string fout, int e) // e is the number of bin (
 	outbin.open(fout, std::ofstream::binary);
 
 	int localN_Z, localN_X, localN_E;
-	get_grid_numbers(localN_Z, localN_X, localN_E);
+	GetGridNumbers(localN_Z, localN_X, localN_E);
 
 	Complex tmp[4];
 
@@ -76,6 +76,8 @@ void Fix_E(std::string fin, std::string fout, int e) // e is the number of bin (
 	outbin.close();
 }
 
+// 1D output //
+
 void Average_by_x(std::string fin, std::string fout)
 {
 	std::ifstream fullbin;
@@ -85,7 +87,7 @@ void Average_by_x(std::string fin, std::string fout)
 	outbin.open(fout, std::ofstream::binary);
 
 	int localN_Z, localN_X, localN_E;
-	get_grid_numbers(localN_Z, localN_X, localN_E);
+	GetGridNumbers(localN_Z, localN_X, localN_E);
 
 	Complex* tmp = new Complex[4*localN_E];
 	Complex* buf = new Complex[4*localN_E];
@@ -125,6 +127,6 @@ void Average_by_x(std::string fin, std::string fout)
 
 int main()
 {
-	Fix_E(P_OUTBIN, "./data/Fix_E.bin", 4);
-	Average_by_x(P_OUTBIN, "./data/Average_by_x.bin");
+	Fix_E(P_BIN, "./data/Fix_E.bin", 15);
+	Average_by_x(P_BIN, "./data/Average_by_x.bin");
 }

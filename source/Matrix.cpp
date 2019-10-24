@@ -1,10 +1,18 @@
-#include "matrix.h"
+#include "Matrix.h"
 
 // Pauli matrices
 Matrix tau0(1, 0, 0, 1);
 Matrix tau1(0, 1, 1, 0);
 Matrix tau2(0, -Complex(0, 1.0), Complex(0, 1.0), 0);
 Matrix tau3(1, 0, 0, -1);
+
+Matrix::Matrix(Complex* ptr)
+{
+	this->e11 = ptr[0];
+	this->e12 = ptr[1];
+	this->e21 = ptr[2];
+	this->e22 = ptr[3];
+}
 
 Matrix::Matrix(Complex e11, Complex e12, Complex e21, Complex e22)
 {
@@ -57,12 +65,12 @@ Matrix Matrix::operator*(const Complex& Z) const
 	return Matrix(this->e11*Z, this->e12*Z,	this->e21*Z, this->e22*Z);
 }
 
-Matrix Matrix::hermit() const
+Matrix Matrix::H() const
 {
 	return Matrix(std::conj(this->e11), std::conj(this->e21), std::conj(this->e12), std::conj(this->e22));
 }
 
-Complex Matrix::tr() const
+Complex Matrix::Tr() const
 {
 	return (this->e11 + this->e22);
 }
@@ -173,7 +181,7 @@ void Matrix::put(int i, int j, Complex* buf)
 	}
 }
 
-void Matrix::normalize()
+void Matrix::normalise()
 {
 	// recover hermitance
 	Complex o11, o12, o21, o22; // old ones
