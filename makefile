@@ -14,7 +14,7 @@ Z_test.o:
 
 # Main calculational unit in this project
 
-run: Main.o InitialSpectra.o Inhomogeneities.o Segmentation.o StandardScheme.o BaseBin.o Matrix.o StandardRK.o AdiabaticScheme.o Log.o Layer.o Vector.o Unit.o
+run: Main.o Vector.o InitialSpectra.o Inhomogeneities.o Segmentation.o StandardScheme.o BaseBin.o Matrix.o StandardRK.o AdiabaticScheme.o Log.o Layer.o Unit.o
 	$(compiler) Main.o InitialSpectra.o Segmentation.o StandardScheme.o BaseBin.o Matrix.o StandardRK.o Inhomogeneities.o AdiabaticScheme.o Log.o Layer.o Vector.o Unit.o -o run 
 
 Main.o: ./source/Main.cpp ./source/Constants.h

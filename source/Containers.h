@@ -72,9 +72,9 @@ class Vector
 		void Init(Complex* buffer);
 
 		// Singular operations
-		Vector operator+(const Unit& u) const;
-		Vector operator-(const Unit& u) const;
-		Vector operator*(const Unit& u) const;
+		Vector operator+(const Vector& v) const;
+		Vector operator-(const Vector& v) const;
+		Vector operator*(const Vector& v) const;
 
 		Vector operator/(const Complex& z) const;
 
@@ -82,15 +82,15 @@ class Vector
 		Vector operator*(const Complex z) const;
 
 		// Left multiplication on a Complex number
-		friend Vector operator*(const Complex& z, const Unit& u);
+		friend Vector operator*(const Complex& z, const Vector& v);
 
 		// Double-operations
-		void operator+=(const Unit& u);
-		void operator-=(const Unit& u);
+		void operator+=(const Vector& v);
+		void operator-=(const Vector& v);
 		void operator*=(const Complex& z);
 		void operator/=(const Complex& z);
 
-		void operator=(const Unit& u);
+		void operator=(const Vector& v);
 
 		// Access/modify method
 		Unit& operator()(int e, int type, int zeta);
@@ -99,12 +99,12 @@ class Vector
 
 		Complex norm();
 
-		// Recover trace = 1 and Hermitance
+		// Recover trace = 1 and Hermitance of each matrix
 		void normalise();
 
 		// Commutator and the skew-product
-		friend Unit commutator(const Unit& u1, const Unit& u2);
-		friend Unit skew(const Unit& u1, const Unit& u2);
+		friend Vector commutator(const Vector& v1, const Vector& v2);
+		friend Vector skew(const Vector& v1, const Vector& v2);
 
 	protected:
 		Unit UnitBuffer[N_E*4];

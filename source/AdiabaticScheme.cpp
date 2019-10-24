@@ -143,12 +143,12 @@ void AdiabaticScheme::Initialise()
 	{
 		for (int e = 0; e < N_E; ++e)
 		{
-			Rho_prev.Init(MyCountX, ScatterBuffer);
-			Rho_here.Init(MyCountX, ScatterBuffer);
+			Rho_prev->Init(MyCountX, ScatterBuffer);
+			Rho_here->Init(MyCountX, ScatterBuffer);
 
 			// An initial approximation of the next point at the 1st iteration
-			Rho_next_0.Init(MyCountX, ScatterBuffer);
-			Rho_next_1.Init(MyCountX, ScatterBuffer);
+			Rho_next_0->Init(MyCountX, ScatterBuffer);
+			Rho_next_1->Init(MyCountX, ScatterBuffer);
 		}
 	}
 
@@ -195,7 +195,7 @@ void AdiabaticScheme::Process()
 	Log Logger(MyRank, Start_time, Z_init, Z_displacement);
 
 	// Auxiliary variables
-	double Z; int ITER;
+	double Z; int Step;
 
 	for (int z = 0; z < N_Z; ++z)
 	{
