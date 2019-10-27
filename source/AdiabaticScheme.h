@@ -6,14 +6,25 @@
 #include "Constants.h"
 #include "Matrix.h"
 #include "Containers.h"
+#include "Inhomogeneities.h"
 
-void AdiabaticFDM(Layer* Rho_prev, Layer* Rho_here, Layer* Rho_next_0, Layer* Rho_next_1, Unit* H_0,
+void AdiabaticFDM(Layer* Rho_prev, Layer* Rho_here, Layer* Rho_next_0, Layer* Rho_next_1,
+				  Layer* H_prev,   Layer* H_here,   Layer* H_next_0,   Layer* H_next_1,
+				  Unit* H_0,
 				  double* Spec_nu,
 				  double* Spec_antinu,
 				  double* Harmonics,
 				  int     MyCountX,
 				  double  Z,
 				  double  Xleft);
+
+void EvaluateHamiltonian(Layer* Rho_buf, Layer* H_buf, Unit* H_0,
+			     		 double* Spec_nu,
+				  		 double* Spec_antinu,
+				  		 double* Harmonics,
+				  		 int     MyCountX,
+				  		 double  Z,
+				  		 double  Xleft);
 
 // Remark: Rho_next_0 is a kth approximation and Rho_next_1 is a (k+1)th one
 
@@ -67,6 +78,13 @@ class AdiabaticScheme: public BaseScheme
 
 		Layer Rhos[4]; // Real objects of the aliases above
 
+		Layer* H_prev;
+		Layer* H_here;
+		Layer* H_next_0;
+		Layer* H_next_1;
+
+		Layer Hs[4]; // Real objects of the aliases above
+
 		// Spectra buffers; used in integrals
 		double* Spec_e;
 		double* Spec_x;
@@ -83,4 +101,11 @@ class AdiabaticScheme: public BaseScheme
 
 		// The very start time stamp of the calculations
 		double Start_time;
+
+		// Interchange buffers
+		Complex* ToLeftNeighbour;
+		Complex* ToRightNeighbour;
+
+		Complex* FromLeftNeighbour;
+		Complex* FromRightNeighbour;		
 };

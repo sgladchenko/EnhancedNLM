@@ -127,6 +127,6 @@ void Average_by_x(std::string fin, std::string fout)
 
 int main()
 {
-	Fix_E(P_BIN, "./data/Fix_E.bin", 15);
+	Fix_E(P_BIN, "./data/Fix_E.bin", 3);
 	Average_by_x(P_BIN, "./data/Average_by_x.bin");
 }

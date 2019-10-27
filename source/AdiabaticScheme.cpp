@@ -87,8 +87,19 @@ AdiabaticScheme::AdiabaticScheme(int given_MyRank, int given_CommSize)
 	Rho_here   = Rhos + 1;
 	Rho_next_0 = Rhos + 2;
 	Rho_next_1 = Rhos + 3;
-}
 
+	H_prev   = Hs;
+	H_here   = Hs + 1;
+	H_next_0 = Hs + 2;
+	H_next_1 = Hs + 3;
+
+	// Allocation of the interchange buffers
+	ToLeftNeighbour  = new Complex[16*N_E];
+	ToRightNeighbour = new Complex[16*N_E];
+
+	FromLeftNeighbour  = new Complex[16*N_E];
+	FromRightNeighbour = new Complex[16*N_E];
+}
 
 void AdiabaticScheme::Initialise()
 {
@@ -149,6 +160,18 @@ void AdiabaticScheme::Initialise()
 			// An initial approximation of the next point at the 1st iteration
 			Rho_next_0->Init(MyCountX, ScatterBuffer);
 			Rho_next_1->Init(MyCountX, ScatterBuffer);
+
+			// Remark: Layer class considers that all the grids should have additional points on the left and on the right
+			//         from the neighbour-nodes
+
+			// This is just a dummy intialisation -- in order to allocate desired memory for the further calculations
+
+			H_prev->Init(MyCountX, ScatterBuffer);
+			H_here->Init(MyCountX, ScatterBuffer);
+
+			// An initial approximation of the next point at the 1st iteration
+			H_next_0->Init(MyCountX, ScatterBuffer);
+			H_next_1->Init(MyCountX, ScatterBuffer);
 		}
 	}
 
@@ -184,6 +207,39 @@ void AdiabaticScheme::Initialise()
 		// The desired part of the Hamiltonian depending on E
 		H_0[s] = -eta*dm2*c2theta/(4.0*E) * sigma_3 + eta*dm2*s2theta/(4.0*E) * sigma_1; // Units
 	}
+
+	// Evaluating the initial Hamiltonians
+	EvaluateHamiltonian(Rho_prev, H_prev, H_0,
+			     		Spec_nu,
+				  		Spec_antinu,
+				  		Harmonics,
+				  		MyCountX,
+				  		0,
+				  		Xleft);
+
+	EvaluateHamiltonian(Rho_here, H_here, H_0,
+			     		Spec_nu,
+				  		Spec_antinu,
+				  		Harmonics,
+				  		MyCountX,
+				  		0,
+				  		Xleft);
+
+	EvaluateHamiltonian(Rho_next_0, H_next_0, H_0,
+			     		Spec_nu,
+				  		Spec_antinu,
+				  		Harmonics,
+				  		MyCountX,
+				  		0,
+				  		Xleft);
+
+	EvaluateHamiltonian(Rho_next_1, H_next_1, H_0,
+			     		Spec_nu,
+				  		Spec_antinu,
+				  		Harmonics,
+				  		MyCountX,
+				  		0,
+				  		Xleft);
 }
 
 void AdiabaticScheme::Process()
@@ -204,28 +260,65 @@ void AdiabaticScheme::Process()
 		{
 			// Current index of the step and Z-coordinate
 			Step = z * STEP_Z + zi;
-			Z    = Z_init + (Step + 1)*dZ;
+			Z    = Z_init + (Step)*dZ;
 
 			// Calculations at this step
 
-			// FUCK YEEEEE
+			AdiabaticFDM(Rho_prev, Rho_here, Rho_next_0, Rho_next_1,
+						 H_prev,   H_here,   H_next_0,   H_next_1,
+						 H_0,
+						 Spec_nu,
+						 Spec_antinu,
+						 Harmonics,
+						 MyCountX,
+						 Z,
+						 Xleft);
 
-			// Calculate new points & Save new values in the buffers
+			// Pack new values to the interchange buffers
+			(*Rho_next_0)(1).Pack(ToLeftNeighbour);
+			(*Rho_next_0)(MyCountX).Pack(ToRightNeighbour);
+
+			// Some stuff to be used in the interchanging processes
+			MPI_Request left_req, right_req;
+			MPI_Status  left_st,  right_st;
+
+			// Interchanging...
+
+			MPI_Isend(ToLeftNeighbour,  16*N_E, MPIComplex, LeftNeighbour,  1, MPIWorld,  &left_req);
+			MPI_Isend(ToRightNeighbour, 16*N_E, MPIComplex, RightNeighbour, 1, MPIWorld, &right_req);
+
+			MPI_Recv(FromLeftNeighbour,  16*N_E, MPIComplex, LeftNeighbour,  1, MPIWorld,  &left_st);
+			MPI_Recv(FromRightNeighbour, 16*N_E, MPIComplex, RightNeighbour, 1, MPIWorld, &right_st);
+
+			// Unpack new values for the interchange buffers
+			(*Rho_next_0)(0).Unpack(FromLeftNeighbour);
+			(*Rho_next_0)(MyCountX+1).Unpack(FromRightNeighbour);
+
+			// Evaluate new Hamiltonians
+			EvaluateHamiltonian(Rho_next_0, H_next_0, H_0,
+					     		Spec_nu,
+						  		Spec_antinu,
+						  		Harmonics,
+						  		MyCountX,
+						  		Z,
+						  		Xleft);
+
+			// Cyclic swapping variables!
+			Layer* tmp;
+
+			tmp        = Rho_prev;
+			Rho_prev   = Rho_here;
+			Rho_here   = Rho_next_0;
+			Rho_next_0 = tmp;
+
+			tmp      = H_prev;
+			H_prev   = H_here;
+			H_here   = H_next_0;
+			H_next_0 = tmp;
 		}
-
-		// Gather new line of values at the root-node and save in the binaries
 
 		// Copying data from the arrays of Matrix to the arrays of Complex
-		for (int x = 1; x <= MyCountX; ++x)
-		{
-			for (int e = 0; e < N_E; ++e)
-			{
-				//p[x*N_E + e].pack(GatherBuffer     + (x-1)*N_E*16 + e*16 + 0*4);
-				//m[x*N_E + e].pack(GatherBuffer     + (x-1)*N_E*16 + e*16 + 1*4);
-				//antip[x*N_E + e].pack(GatherBuffer + (x-1)*N_E*16 + e*16 + 2*4);
-				//antim[x*N_E + e].pack(GatherBuffer + (x-1)*N_E*16 + e*16 + 3*4);
-			}
-		}
+		Rho_here->Dump(GatherBuffer);
 
 		// Gathering and saving main calculational data
 		if (MyRank == 0)

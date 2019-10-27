@@ -248,3 +248,20 @@ Unit skew(const Unit& u1, const Unit& u2)
 		   sigma_2 * 0.5*(PauliBuffer1[3]*PauliBuffer2[1] - PauliBuffer1[1]*PauliBuffer2[3]) + 
 		   sigma_3 * 0.5*(PauliBuffer1[1]*PauliBuffer2[2] - PauliBuffer1[2]*PauliBuffer2[1]);
 }
+
+// Pack/unpack from the external Complex-buffer
+void Unit::Pack(Complex* buf)
+{
+	for (int k = 0; k < 4; ++k)
+	{
+		buf[k] = ComplexBuffer[k];
+	}
+}
+
+void Unit::Unpack(Complex* buf)
+{
+	for (int k = 0; k < 4; ++k)
+	{
+		ComplexBuffer[k] = buf[k];
+	}
+}

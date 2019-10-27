@@ -54,6 +54,10 @@ class Unit
 		friend Unit commutator(const Unit& u1, const Unit& u2);
 		friend Unit skew(const Unit& u1, const Unit& u2);
 
+		// Pack/unpack from the external Complex-buffer
+		void Pack(Complex* buf);
+		void Unpack(Complex* buf);
+
 	protected:
 		Complex ComplexBuffer[4];
 };
@@ -102,9 +106,16 @@ class Vector
 		// Recover trace = 1 and Hermitance of each matrix
 		void normalise();
 
+		// Multiply components with different zeta by \pm
+		void MultiplyByPrefactor();
+
 		// Commutator and the skew-product
 		friend Vector commutator(const Vector& v1, const Vector& v2);
 		friend Vector skew(const Vector& v1, const Vector& v2);
+
+		// Pack/unpack from the external Complex-buffer
+		void Pack(Complex* buf);
+		void Unpack(Complex* buf);
 
 	protected:
 		Unit UnitBuffer[N_E*4];
@@ -117,12 +128,17 @@ class Layer
 		// Initialise from a given ScatterBuffer pointer
 		Layer(int given_MyCountX, Complex* buffer);
 		Layer();
+		~Layer();
 
+		// Intialiser that might be used after calling of the default constructor in the allocations
 		void Init(int given_MyCountX, Complex* buffer);
 
-		Vector& operator()(int x);
+		// The analogue of Unpack functions of the containers above
+		// But this action is rather more formidable :)
+		void Dump(Complex* buf);
 
-		~Layer();
+		// Access/modify method
+		Vector& operator()(int x);
 
 	protected:
 		// Number of points in this chunck

@@ -6,7 +6,7 @@ all:
 
 # Test section:
 
-test_containers: Layer.o Vector.o Unit.o Z_test.o
+test: Layer.o Vector.o Unit.o Z_test.o
 	$(compiler) Unit.o Vector.o Layer.o Z_test.o -o test_containers; make clean
 
 Z_test.o:
@@ -14,8 +14,8 @@ Z_test.o:
 
 # Main calculational unit in this project
 
-run: Main.o Vector.o InitialSpectra.o Inhomogeneities.o Segmentation.o StandardScheme.o BaseBin.o Matrix.o StandardRK.o AdiabaticScheme.o Log.o Layer.o Unit.o
-	$(compiler) Main.o InitialSpectra.o Segmentation.o StandardScheme.o BaseBin.o Matrix.o StandardRK.o Inhomogeneities.o AdiabaticScheme.o Log.o Layer.o Vector.o Unit.o -o run 
+run: Main.o Vector.o InitialSpectra.o Inhomogeneities.o Segmentation.o StandardScheme.o BaseBin.o Matrix.o StandardRK.o AdiabaticScheme.o Log.o Layer.o Unit.o AdiabaticFDM.o
+	$(compiler) Main.o InitialSpectra.o Segmentation.o StandardScheme.o BaseBin.o Matrix.o StandardRK.o Inhomogeneities.o AdiabaticScheme.o Log.o Layer.o Vector.o Unit.o AdiabaticFDM.o -o run 
 
 Main.o: ./source/Main.cpp ./source/Constants.h
 	$(compiler) -c ./source/Main.cpp -lm
@@ -54,7 +54,10 @@ Vector.o: ./source/Vector.cpp ./source/Containers.h ./source/Constants.h
 	$(compiler) -c ./source/Vector.cpp -lm	
 
 Layer.o: ./source/Layer.cpp ./source/Containers.h ./source/Constants.h
-	$(compiler) -c ./source/Layer.cpp -lm	
+	$(compiler) -c ./source/Layer.cpp -lm
+
+AdiabaticFDM.o: ./source/AdiabaticFDM.cpp ./source/Containers.h ./source/Constants.h ./source/AdiabaticScheme.h
+	$(compiler) -c ./source/AdiabaticFDM.cpp -lm
 
 # Executable which generates for us initial data, saved in rec.bin
 

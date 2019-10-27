@@ -75,7 +75,7 @@ const double Emin = 1.0  * ph::MeV;
 // Limit of the 'infinite' integral
 const double Emax = 50.0 * ph::MeV;
 // Count of the segments in the energy spectrum
-const int    N_E  = 20;
+const int    N_E  = 5;
 // Step of the energy grid
 const double dE   = (Emax - Emin) / N_E;
 

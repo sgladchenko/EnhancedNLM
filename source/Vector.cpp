@@ -280,3 +280,33 @@ Vector skew(const Vector& v1, const Vector& v2)
 
 	return result;
 }
+
+// Multiply components with different zeta by \pm
+void Vector::MultiplyByPrefactor()
+{
+	for (int e = 0; e < N_E; ++e)
+	{
+		for (int type = 0; type < 2; ++type)
+		{
+			// For zeta = 1 (this's equal to $\zeta=-1$) we should multiply by -1, if needed
+			UnitBuffer[e*4 + type*2 + 1] *= -1.0;
+		}
+	}	
+}
+
+// Pack/unpack from the external Complex-buffer
+void Vector::Pack(Complex* buf)
+{
+	for (int k = 0; k < 4*N_E; ++k)
+	{
+		UnitBuffer[k].Pack(buf + k*4);
+	}
+}
+
+void Vector::Unpack(Complex* buf)
+{
+	for (int k = 0; k < 4*N_E; ++k)
+	{
+		UnitBuffer[k].Unpack(buf + k*4);
+	}
+}
